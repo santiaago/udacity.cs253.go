@@ -41,7 +41,7 @@ const rot13HTML = `
     <body>
         <h2>Enter some text to ROT13:</h2>
         <form method="post">
-            <textarea name="text" style="height: 100px; width: 400px;">{{.Rot13}}</textarea><br>
+            <textarea name="text" style="height: 100px; width: 400px;">{{.Str}}</textarea><br>
             <input type="submit">
         </form>
     </body>
