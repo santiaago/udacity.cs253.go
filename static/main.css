@@ -1,0 +1,136 @@
+body {
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 14px;
+
+    width: 800px;
+    margin: 0 auto;
+    padding: 10px;
+    color: #333;
+}
+
+h2 {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.error {
+    color: red;
+}
+
+label {
+  display: block;
+  font-size: 20px;
+}
+
+label + label {
+    margin-top: 20px;
+}
+
+input[type=text] {
+    width: 500px;
+    font-size: 20px;
+    padding: 2px;
+    font-family: monospace;
+}
+
+textarea {
+  width: 500px;
+  height: 400px;
+  font-size: 17px;
+  font-family: monospace;
+}
+
+input[type=submit] {
+  font-size: 24px;
+}
+
+.main-title {
+    display: block;
+    color: #222;
+    font-size: 40px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 30px;
+    text-decoration: none;
+}
+.post + .post {
+    margin-top: 15px;
+}
+
+.post-heading,.wiki-heading  {
+    position: relative;
+    border-bottom: 3px solid #666;
+    height: 25px;
+}
+.post-title,.wiki-title {
+    font-size: 24px;
+    font-weight: bold;
+    float: left;
+}
+
+.post-link, .wiki-link{
+    color: #222;
+    font-size: 24px;
+    font-weight: bold;
+    text-decoration: none;
+}
+.post-date, .wiki-date{
+    padding: 7px 10px;
+    color: #999;
+    text-align:right;
+}
+.version-date{
+    padding: 0px 0px;
+    color:#222;
+    font-weight:bold;
+    font-size:10px;
+    text-align:left;
+}
+.version-links a{
+    display: block;
+    text-decoration: none;
+    font-weight: bold;
+    width:30px;
+    color: #08c;
+}
+.version-links a:hover {
+    color: #007ab7;
+    background-color: #fff; 
+    border-bottom: 2px solid #08c;
+}
+.version-content{
+    background-color: #fff; 
+}
+.post-content, .wiki-content {
+    margin-top: 12px;
+}
+.wiki-navigation {
+    position: relative;
+    width: 100%;
+    margin: 0 0 3em 0;
+    padding: 0;
+    list-style: none;
+    height:4px;
+}
+.wiki-navigation li {
+    float: right; 
+}
+.wiki-navigation  li a {
+    display: block;
+    padding: 0px 15px;
+    text-decoration: none;
+    font-weight: bold;
+    color: #08c;
+}
+.wiki-navigation li a:hover {
+    color: #007ab7;
+    background-color: #fff; 
+    border-bottom: 1px solid #08c;
+}
+.wiki-time{
+    font-size:8px;
+    font-style:italic;
+    text-align:right;
+}
+

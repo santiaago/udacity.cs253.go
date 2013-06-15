@@ -31,3 +31,7 @@ func IsEmailValid(email string) bool{
 	}
 	return false
 }
+
+func ValidStr(s string) bool{
+	return  len(s)>0
+}
