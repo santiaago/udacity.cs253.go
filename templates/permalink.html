@@ -1,0 +1,24 @@
+{{define "permalink"}}
+<!DOCTYPE html>
+<html>
+<head>
+  <link type="text/css" rel="stylesheet" href="/static/main.css" />
+
+  <title>CS 253 Blog in Go!</title>
+</head>
+
+<body>
+  <a href="/blog" class="main-title">
+    Blog
+  </a>
+
+  {{template "post" .}}
+  <div class="age">
+      queried cache_last_hit seconds ago
+    </div>
+</body>
+
+</html>
+{{end}}
+
+
