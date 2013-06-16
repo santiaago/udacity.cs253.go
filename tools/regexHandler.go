@@ -5,7 +5,7 @@ import (
 	"regexp"
 )
 
-// inspired by the following sources:
+// inspired by the following sources with some small changes:
 //http://stackoverflow.com/questions/6564558/wildcards-in-the-pattern-for-http-handlefunc
 //https://github.com/raymi/quickerreference
 

@@ -80,27 +80,39 @@ func PermalinkHandler(w http.ResponseWriter, r *http.Request){
 	if r.Method == "GET" {
 		
 		path := strings.Split(r.URL.String(), "/")
-		c.Infof("cs253: PATH ID : %v", path[2])
-
+		
 		// back to int64
-		intID,_ := strconv.ParseInt(path[2], 0, 64)
+		intID, _ := strconv.ParseInt(path[2], 0, 64)
 		c.Infof("cs253: PATH : %v", intID)
 		// build key
 		key := datastore.NewKey(c, "post", "", intID, nil)
 		c.Infof("cs253: PATH : %v", key)
 		
-		var p Post
+		var p models.Post
 		if err := datastore.Get(c, key, &p); err != nil {
 			c.Infof("cs253: ERROR : %v", key)			
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		fmt.Fprint(w, p.Subject)
+		writePermalink(w, &p)
 	}else{
 		tools.Error404(w)
 		return
 	}
 }
+
+func writePermalink(w http.ResponseWriter, p *models.Post){
+	tmpl, _ := template.ParseFiles("templates/permalink.html","templates/post.html")
+	tmpl.ExecuteTemplate(w,"permalink",p)
+}
+
+
+
+
+
+
+
+
 
 
 
