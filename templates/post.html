@@ -2,11 +2,11 @@
 <div class="post">
   <div class="post-heading">
     <div class="post-title">
-        <a href="/unit3/blog/todo" class="post-link">{{.Subject}}</a>
+        <a href="/blog/{{.Id}}" class="post-link">{{.Subject}}</a>
     </div>
 
     <div class="post-date">
-      {{.Created}}
+      {{.Created.Format "02-01-2006 15:04:05"}}
     </div>
   </div>
 

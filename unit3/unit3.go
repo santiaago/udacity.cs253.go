@@ -41,19 +41,31 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request){
 			postForm.Error = "We need to set both a subject and some content"
 			writeNewPostForm(w, &postForm)
 		}else{
+			c.Infof("cs253: Blog new post:")
 			p := models.Post{
+				0,
 				postForm.Subject,
 				postForm.Content,
 				time.Now(),
 			}
-			key, err := datastore.Put(c, datastore.NewIncompleteKey(c, "post", nil), &p)
+			incKey := datastore.NewIncompleteKey(c,"post",nil)
+			key, err := datastore.Put(c, incKey, &p)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-			c.Infof("cs253: Blog Key: %v", key)
+			c.Infof("cs253: Blog Key: %v", key.IntID())
+			// set post id
+			p.Id = key.IntID()
+			key, err = datastore.Put(c, key, &p)
+			if err != nil {
+			 	http.Error(w, err.Error(), http.StatusInternalServerError)
+			 	return
+			}
+			c.Infof("cs253: Blog new post key: %v", key)
+			c.Infof("cs253: Blog new post id: %v", p.Id)
 			// build url and redirect
-			permalinkURL := "/blog/"+strconv.FormatInt(key.IntID(),10)
+			permalinkURL := "/blog/"+strconv.FormatInt(p.Id,10)
 			http.Redirect(w, r, permalinkURL, http.StatusFound)
 		}
 	}else{
@@ -94,6 +106,7 @@ func PermalinkHandler(w http.ResponseWriter, r *http.Request){
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+		c.Infof("cs253: Key : %v", p.Id)
 		writePermalink(w, &p)
 	}else{
 		tools.Error404(w)
