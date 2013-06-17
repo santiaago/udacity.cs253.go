@@ -3,7 +3,7 @@ package unit3
 import (
 	"appengine"
 	"appengine/datastore"
-	"fmt"
+//	"fmt"
 	"html/template"
 	"net/http"
 	"strconv"
@@ -17,11 +17,22 @@ func BlogFrontHandler(w http.ResponseWriter, r *http.Request){
 	c := appengine.NewContext(r)
 	c.Infof("cs253: Requested URL: %v", r.URL)
 	if r.Method == "GET" {
-		fmt.Fprint(w,"Blog front!")		
+		posts := models.RecentPosts(c)
+		c.Infof("cs253: Posts len: %v", len(posts))
+		for i, _ := range posts {
+			c.Infof("cs253: Post id: %v", posts[i].Id)
+		}
+		writeBlog(w, posts)
 	}else{
 		tools.Error404(w)
 		return
 	}
+}
+
+
+func writeBlog(w http.ResponseWriter, posts []*models.Post){
+	tmpl, _ := template.ParseFiles("templates/blog.html","templates/post.html")
+	tmpl.ExecuteTemplate(w,"blog",posts)
 }
 
 func NewPostHandler(w http.ResponseWriter, r *http.Request){
@@ -48,7 +59,7 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request){
 				postForm.Content,
 				time.Now(),
 			}
-			incKey := datastore.NewIncompleteKey(c,"post",nil)
+			incKey := datastore.NewIncompleteKey(c,"Post",nil)
 			key, err := datastore.Put(c, incKey, &p)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -97,7 +108,7 @@ func PermalinkHandler(w http.ResponseWriter, r *http.Request){
 		intID, _ := strconv.ParseInt(path[2], 0, 64)
 		c.Infof("cs253: PATH : %v", intID)
 		// build key
-		key := datastore.NewKey(c, "post", "", intID, nil)
+		key := datastore.NewKey(c, "Post", "", intID, nil)
 		c.Infof("cs253: PATH : %v", key)
 		
 		var p models.Post

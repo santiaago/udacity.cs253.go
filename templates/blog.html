@@ -1,0 +1,24 @@
+{{define "blog"}}
+<!DOCTYPE html>
+<html>
+<head>
+  <link type="text/css" rel="stylesheet" href="/static/main.css" />
+
+  <title>CS 253 Blog</title>
+</head>
+<body>
+    <a href="/unit3/blog" class="main-title">Blog</a>
+
+    <div id="content">
+      {{range $i, $p :=.}}
+      {{template "post" $p}}
+      {{end}}
+        <div class="age">
+            queried cache_last_hit seconds ago
+          </div>
+
+    </div>
+</body>
+
+</html>
+{{end}}
