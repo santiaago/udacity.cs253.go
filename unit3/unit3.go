@@ -53,14 +53,17 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request){
 			writeNewPostForm(w, &postForm)
 		}else{
 			c.Infof("cs253: Blog new post:")
+			
+			postID, _, _ := datastore.AllocateIDs(c, "Post", nil, 1)
+			key := datastore.NewKey(c, "Post", "", postID, nil)
 			p := models.Post{
-				0,
+				postID,
 				postForm.Subject,
 				postForm.Content,
 				time.Now(),
 			}
-			incKey := datastore.NewIncompleteKey(c,"Post",nil)
-			key, err := datastore.Put(c, incKey, &p)
+			//incKey := datastore.NewIncompleteKey(c,"Post",nil)
+			key, err := datastore.Put(c, key, &p)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
@@ -104,28 +107,25 @@ func PermalinkHandler(w http.ResponseWriter, r *http.Request){
 		
 		path := strings.Split(r.URL.String(), "/")
 		
-		// back to int64
 		intID, _ := strconv.ParseInt(path[2], 0, 64)
 		c.Infof("cs253: PATH : %v", intID)
 		// build key
-		key := datastore.NewKey(c, "Post", "", intID, nil)
-		c.Infof("cs253: PATH : %v", key)
+		c.Infof("cs253: postAndTimeByID call : %v", intID)
+		post, cache_hit_time := models.PostAndTimeByID(c, intID)
+		c.Infof("cs253: postAndTimeByID done ! : %v", intID)
 		
-		var p models.Post
-		if err := datastore.Get(c, key, &p); err != nil {
-			c.Infof("cs253: ERROR : %v", key)			
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		c.Infof("cs253: Key : %v", p.Id)
-		writePermalink(w, &p)
+		c.Infof("cs253: Post id: %v", post.Id)
+		c.Infof("cs253: Cache hit time: %v", cache_hit_time)
+		
+		postAndTime := models.PostAndTime{P:post, T:cache_hit_time}
+		writePermalink(w, postAndTime)
 	}else{
 		tools.Error404(w)
 		return
 	}
 }
 
-func writePermalink(w http.ResponseWriter, p *models.Post){
+func writePermalink(w http.ResponseWriter, p models.PostAndTime){
 	tmpl, _ := template.ParseFiles("templates/permalink.html","templates/post.html")
 	tmpl.ExecuteTemplate(w,"permalink",p)
 }
