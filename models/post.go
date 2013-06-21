@@ -20,8 +20,8 @@ type Post struct {
 
 // PostAndTime is the type used to hold a Post and it's "cache hit time" information.
 type PostAndTime struct{
-	P Post
-	T time.Time
+	Post Post
+	Cache_hit_time time.Time
 }
 
 func init(){
@@ -44,13 +44,11 @@ func RecentPosts(c appengine.Context)([]*Post){
 }
 
 // PostAndTimeByID returns a PostAndTime for the requested id
-func PostAndTimeByID(c appengine.Context, id int64)( Post,  time.Time){
+func PostAndTimeByID(c appengine.Context, id int64)( PostAndTime){
 	memcacheKey := "posts_and_time"+strconv.FormatInt(id, 10)
 	c.Infof("cs253: Post and time by id memcache key is: %v ",memcacheKey)
 
-	var p Post
-	var t time.Time
-
+	var postAndTime PostAndTime
 	c.Infof("cs253: query cache first with memcache key")
 	if item, err := memcache.Get(c, memcacheKey); err == memcache.ErrCacheMiss {
 		c.Infof("cs253: item not in the cache :%v will perform query instead",err)
@@ -58,19 +56,18 @@ func PostAndTimeByID(c appengine.Context, id int64)( Post,  time.Time){
 		key := datastore.NewKey(c, "Post", "", id, nil)
 		c.Infof("cs253: key to use: v%", key)
 
-		if err := datastore.Get(c, key, &p); err != nil {
+		if err := datastore.Get(c, key, &postAndTime.Post); err != nil {
 			c.Errorf("cs253: post not found : %v", err)
 		}
 		c.Infof("cs253: get time:")
-		t = time.Now()
-		c.Infof("cs253: time is: %v", t)
+		postAndTime.Cache_hit_time = time.Now()
+		c.Infof("cs253: time is: %v", postAndTime.Cache_hit_time)
 		// record information in cache for next time
-		postAndTime := PostAndTime{P: p, T: t,}
 		mCache := new(bytes.Buffer)
 		encCache := gob.NewEncoder(mCache)
-		c.Infof("cs253: New Encoder done", t)
+		c.Infof("cs253: New Encoder done")
 		encCache.Encode(postAndTime)
-		c.Infof("cs253: Encode done", t)
+		c.Infof("cs253: Encode done")
 
 		postItem := &memcache.Item{
 			Key:   memcacheKey,
@@ -78,7 +75,7 @@ func PostAndTimeByID(c appengine.Context, id int64)( Post,  time.Time){
 		}
 		c.Infof("cs253: memcache Item ready")
 		if err := memcache.Add(c, postItem); err == memcache.ErrNotStored {
-			c.Infof("cs253: postAndTime with key %q already exists", item.Key)
+			c.Errorf("cs253: postAndTime with key %q already exists", item.Key)
 		} else if err != nil {
 			c.Errorf("error adding item: %v", err)
 		}
@@ -88,20 +85,13 @@ func PostAndTimeByID(c appengine.Context, id int64)( Post,  time.Time){
 		c.Errorf("cs253: Memcache error getting item: %v",err)
 	} else {
 		c.Infof("cs253: Memcache item found")
-		var postAndTime PostAndTime
-		
-		pCache := bytes.NewBuffer(item.Value)//mCache.Bytes())
+
+		pCache := bytes.NewBuffer(item.Value)
 		c.Infof("cs253: New Buffer ready")
-		
 		decCache := gob.NewDecoder(pCache)
 		c.Infof("cs253: decoder ready")
-		
 		decCache.Decode(&postAndTime)
-		c.Infof("cs253: god decoder of item done")
-		
-		p = postAndTime.P
-		t = postAndTime.T
-		
+		c.Infof("cs253: gob decoder of item done")
 	}	
-	return p, t
+	return postAndTime
 }

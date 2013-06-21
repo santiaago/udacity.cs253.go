@@ -12,9 +12,9 @@
     Blog
   </a>
 
-  {{template "post" .P}}
+  {{template "post" .Post}}
   <div class="age">
-      queried {{.T}} seconds ago
+      queried {{.Cache_hit_time}} seconds ago
     </div>
 </body>
 

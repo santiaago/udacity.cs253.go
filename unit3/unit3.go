@@ -67,22 +67,13 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request){
 				postForm.Content,
 				time.Now(),
 			}
-			//incKey := datastore.NewIncompleteKey(c,"Post",nil)
 			key, err := datastore.Put(c, key, &p)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 			c.Infof("cs253: Blog Key: %v", key.IntID())
-			// set post id
-			p.Id = key.IntID()
-			key, err = datastore.Put(c, key, &p)
-			if err != nil {
-			 	http.Error(w, err.Error(), http.StatusInternalServerError)
-			 	return
-			}
-			c.Infof("cs253: Blog new post key: %v", key)
-			c.Infof("cs253: Blog new post id: %v", p.Id)
+
 			// build url and redirect
 			permalinkURL := "/blog/"+strconv.FormatInt(p.Id,10)
 			http.Redirect(w, r, permalinkURL, http.StatusFound)
@@ -114,18 +105,16 @@ func PermalinkHandler(w http.ResponseWriter, r *http.Request){
 	if r.Method == "GET" {
 		
 		path := strings.Split(r.URL.String(), "/")
-		
 		intID, _ := strconv.ParseInt(path[2], 0, 64)
 		c.Infof("cs253: PATH : %v", intID)
-		// build key
+		// build post key
 		c.Infof("cs253: postAndTimeByID call : %v", intID)
-		post, cache_hit_time := models.PostAndTimeByID(c, intID)
+		postAndTime := models.PostAndTimeByID(c, intID)
 		c.Infof("cs253: postAndTimeByID done ! : %v", intID)
 		
-		c.Infof("cs253: Post id: %v", post.Id)
-		c.Infof("cs253: Cache hit time: %v", cache_hit_time)
+		c.Infof("cs253: Post id: %v", postAndTime.Post.Id)
+		c.Infof("cs253: Cache hit time: %v", postAndTime.Cache_hit_time)
 		
-		postAndTime := models.PostAndTime{P:post, T:cache_hit_time}
 		writePermalink(w, postAndTime)
 	}else{
 		tools.Error404(w)
