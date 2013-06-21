@@ -1,17 +1,16 @@
 package models
 
 import (
-	"time"
+	"bytes"
 	"appengine"
 	"appengine/datastore"
 	"appengine/memcache"
-	"strconv"
-	//"net/http"
-	//"encoding/binary"
 	"encoding/gob"
-	"bytes"
+	"strconv"
+	"time"
 )
 
+// Post is the type used to hold the Post information.
 type Post struct {
 	Id int64 
 	Subject string
@@ -19,25 +18,32 @@ type Post struct {
 	Created time.Time
 }
 
+// PostAndTime is the type used to hold a Post and it's "cache hit time" information.
 type PostAndTime struct{
 	P Post
 	T time.Time
 }
 
 func init(){
+	// Registering a Type more than once causes a panic.
+	// so registration should go in an init function.
 	gob.Register(PostAndTime{})	
 }
+
+// RecentPosts returns a pointer to a slice of Posts.
+// orderBy creation time, limit = 20
 func RecentPosts(c appengine.Context)([]*Post){
 	c.Infof("cs253: RecentPosts")
 	q := datastore.NewQuery("Post").Limit(20).Order("-Created")
 	var posts []*Post
 	if _, err := q.GetAll(c, &posts); err != nil {
-		c.Infof("cs253: Error: %v",err)
+		c.Errorf("cs253: Error: %v",err)
 		return nil
 	}
 	return posts
 }
 
+// PostAndTimeByID returns a PostAndTime for the requested id
 func PostAndTimeByID(c appengine.Context, id int64)( Post,  time.Time){
 	memcacheKey := "posts_and_time"+strconv.FormatInt(id, 10)
 	c.Infof("cs253: Post and time by id memcache key is: %v ",memcacheKey)

@@ -3,19 +3,21 @@ package unit3
 import (
 	"appengine"
 	"appengine/datastore"
-//	"fmt"
 	"html/template"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
+
 	"tools"
 	"models"
 )
 
+// BlogFrontHandler is the HTTP handler for displaying the most recent posts.
 func BlogFrontHandler(w http.ResponseWriter, r *http.Request){
 	c := appengine.NewContext(r)
 	c.Infof("cs253: Requested URL: %v", r.URL)
+	c.Infof("cs253: Method: %v", r.Method)
 	if r.Method == "GET" {
 		posts := models.RecentPosts(c)
 		c.Infof("cs253: Posts len: %v", len(posts))
@@ -29,12 +31,13 @@ func BlogFrontHandler(w http.ResponseWriter, r *http.Request){
 	}
 }
 
-
+// writeBlog executes the blog template with a slice of Posts.
 func writeBlog(w http.ResponseWriter, posts []*models.Post){
 	tmpl, _ := template.ParseFiles("templates/blog.html","templates/post.html")
 	tmpl.ExecuteTemplate(w,"blog",posts)
 }
 
+// NewPostHandler is the HTTP handler to create a new Post
 func NewPostHandler(w http.ResponseWriter, r *http.Request){
 	c := appengine.NewContext(r)
 	c.Infof("cs253: Requested URL: %v", r.URL)
@@ -48,7 +51,9 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request){
 			r.FormValue("content"),
 			"",
 		}
-		if !(tools.ValidStr(postForm.Subject) && tools.ValidStr(postForm.Content)){
+		if !(tools.IsStringValid(postForm.Subject) && 
+			tools.IsStringValid(postForm.Content)){
+			
 			postForm.Error = "We need to set both a subject and some content"
 			writeNewPostForm(w, &postForm)
 		}else{
@@ -88,18 +93,21 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request){
 	}
 }
 
+// NewPostForm is the type used to hold the new post information.
 type NewPostForm struct{
 	Subject string 
 	Content string
 	Error string
 }
 
-
+// writeNewPostForm executes the newpost.html template with NewPostForm type as param.
 func writeNewPostForm(w http.ResponseWriter, postForm *NewPostForm){
 	tmpl, _ := template.ParseFiles("templates/newpost.html")
 	tmpl.Execute(w,postForm)
 }
 
+// PermalinkHandler is the HTTP handler for displaying a single post.
+// post information is retreive via the URL: /blog/postId
 func PermalinkHandler(w http.ResponseWriter, r *http.Request){
 	c := appengine.NewContext(r)
 	c.Infof("cs253: Requested URL: %v", r.URL)
@@ -125,25 +133,8 @@ func PermalinkHandler(w http.ResponseWriter, r *http.Request){
 	}
 }
 
+// writePermalink executes the permalink.html template with a PostAndTime type as param.
 func writePermalink(w http.ResponseWriter, p models.PostAndTime){
 	tmpl, _ := template.ParseFiles("templates/permalink.html","templates/post.html")
 	tmpl.ExecuteTemplate(w,"permalink",p)
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

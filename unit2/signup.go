@@ -45,7 +45,7 @@ const signupHTML = `
   </body>
 </html>
 `
-
+// Signup is the type used to hold the user information and it's associate errors.
 type Signup struct{
 	Username string
 	Password string
@@ -57,13 +57,14 @@ type Signup struct{
 	ErrorEmail string
 }
 
+// SignupHandler is the HTTP handler to signup.
+// It verifies the validity of the inputs writen by the user in the signup form.
 func SignupHandler(w http.ResponseWriter, r *http.Request){
 	c := appengine.NewContext(r)
 	c.Infof("cs253: Requested URL: %v", r.URL)
 	c.Infof("cs253: Http METHOD: %v",r.Method)
 	if r.Method == "GET" {
 		s := Signup{}
-
 		if err := signupTemplate.Execute(w,s); err != nil{
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -79,7 +80,12 @@ func SignupHandler(w http.ResponseWriter, r *http.Request){
 			ErrorPasswordMatch: "",
 			ErrorEmail: "",
 		}
-		if !(tools.IsUsernameValid(s.Username) && tools.IsPasswordValid(s.Password) && s.Password == s.Verify && tools.IsEmailValid(s.Email)){
+		// verify signup info.
+		if !(tools.IsUsernameValid(s.Username) && 
+			tools.IsPasswordValid(s.Password) &&
+			s.Password == s.Verify) ||
+			(len(s.Email) > 0 && !tools.IsEmailValid(s.Email)){
+			
 			if ! tools.IsUsernameValid(s.Username){
 				s.ErrorUser = "That's not a valid user name."
 			}
@@ -89,7 +95,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request){
 			if s.Password != s.Verify{
 				s.ErrorPasswordMatch = "Your passwords didn't match."
 			}
-			if !tools.IsEmailValid(s.Email){
+			if len(s.Email)>0 && !tools.IsEmailValid(s.Email){
 				s.ErrorEmail = "That's not a valid email."
 			}
 			s.Password = ""
