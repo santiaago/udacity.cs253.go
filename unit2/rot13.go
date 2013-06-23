@@ -25,6 +25,7 @@ func rot13(b byte) byte{
 	}
 	return (b - first + 13)%(second - first + 1) + first
 }
+
 // Rot13 implement Encode function to perform ROT13 substitution.
 // this is a slight modification of Go tour 60. 
 func (r Rot13) Encode() string{
@@ -51,6 +52,14 @@ const rot13HTML = `
 </html>
 `
 
+// writeForm executes the rot13Template with a given Rot13 variable
+func writeForm(w http.ResponseWriter, r13 Rot13){
+	if err := rot13Template.Execute(w,r13); err != nil{
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
 // Rot13Handler is the HTTP handler for encoding and decoding (rot13(rot13(x)) = x ) a string
 func Rot13Handler(w http.ResponseWriter, r *http.Request){
 	c := appengine.NewContext(r)
@@ -58,18 +67,12 @@ func Rot13Handler(w http.ResponseWriter, r *http.Request){
 	c.Infof("cs253: HTTP METHOD: %v",r.Method)
 	if r.Method == "GET" {
 		r13 := Rot13{}
-		if err := rot13Template.Execute(w,r13); err != nil{
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+		writeForm(w, r13)
 	} else if r.Method == "POST"{
 		r13 := Rot13{r.FormValue("text"),}
 		r13.Str = r13.Encode()
 		c.Infof("cs253: Rot13 %v",r13.Str)
-		if err := rot13Template.Execute(w,r13); err != nil{
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+		writeForm(w, r13)
 	}else{
 		tools.Error404(w)
 		return
