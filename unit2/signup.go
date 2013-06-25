@@ -57,6 +57,14 @@ type Signup struct{
 	ErrorEmail string
 }
 
+// writeForm executes the SignupTemplate with a given Rot13 variable
+func writeFormSignup(w http.ResponseWriter, s Signup){
+	if err := signupTemplate.Execute(w,s); err != nil{
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
 // SignupHandler is the HTTP handler to signup.
 // It verifies the validity of the inputs writen by the user in the signup form.
 func SignupHandler(w http.ResponseWriter, r *http.Request){
@@ -65,10 +73,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request){
 	c.Infof("cs253: Http METHOD: %v",r.Method)
 	if r.Method == "GET" {
 		s := Signup{}
-		if err := signupTemplate.Execute(w,s); err != nil{
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+		writeFormSignup(w, s)
 	} else if r.Method == "POST"{
 		s := Signup{
 			Username: r.FormValue("username"),
@@ -100,10 +105,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request){
 			}
 			s.Password = ""
 			s.Verify = ""
-			if err := signupTemplate.Execute(w,s); err != nil{
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
+			writeFormSignup(w, s)
 		}else{
 			http.Redirect(w,r, "/unit2/welcome?username="+s.Username, http.StatusFound)
 		}

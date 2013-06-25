@@ -52,8 +52,8 @@ const rot13HTML = `
 </html>
 `
 
-// writeForm executes the rot13Template with a given Rot13 variable
-func writeForm(w http.ResponseWriter, r13 Rot13){
+// writeFormRot13 executes the rot13Template with a given Rot13 variable
+func writeFormRot13(w http.ResponseWriter, r13 Rot13){
 	if err := rot13Template.Execute(w,r13); err != nil{
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -67,12 +67,12 @@ func Rot13Handler(w http.ResponseWriter, r *http.Request){
 	c.Infof("cs253: HTTP METHOD: %v",r.Method)
 	if r.Method == "GET" {
 		r13 := Rot13{}
-		writeForm(w, r13)
+		writeFormRot13(w, r13)
 	} else if r.Method == "POST"{
 		r13 := Rot13{r.FormValue("text"),}
 		r13.Str = r13.Encode()
 		c.Infof("cs253: Rot13 %v",r13.Str)
-		writeForm(w, r13)
+		writeFormRot13(w, r13)
 	}else{
 		tools.Error404(w)
 		return
