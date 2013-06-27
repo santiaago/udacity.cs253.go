@@ -8,9 +8,7 @@ import (
 )
 
 // Rot13 is the type used to hold the string to encode.
-type Rot13 struct{
-	Str string
-}
+type Rot13 string
 
 // rot13 returns the rot13 substitution of single byte.
 func rot13(b byte) byte{
@@ -29,8 +27,8 @@ func rot13(b byte) byte{
 // Rot13 implement Encode function to perform ROT13 substitution.
 // this is a slight modification of Go tour 60. 
 func (r Rot13) Encode() string{
-	n := len(r.Str)
-	t:= []byte(r.Str)
+	n := len(r)
+	t:= []byte(r)
 	for i := 0; i < n; i++{
 		t[i] = rot13(t[i])
 	}
@@ -45,7 +43,7 @@ const rot13HTML = `
     <body>
         <h2>Enter some text to ROT13:</h2>
         <form method="post">
-            <textarea name="text" style="height: 100px; width: 400px;">{{.Str}}</textarea><br>
+            <textarea name="text" style="height: 100px; width: 400px;">{{.}}</textarea><br>
             <input type="submit">
         </form>
     </body>
@@ -53,7 +51,7 @@ const rot13HTML = `
 `
 
 // writeFormRot13 executes the rot13Template with a given Rot13 variable
-func writeFormRot13(w http.ResponseWriter, r13 Rot13){
+func writeFormRot13(w http.ResponseWriter, r13 string){
 	if err := rot13Template.Execute(w,r13); err != nil{
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -66,13 +64,11 @@ func Rot13Handler(w http.ResponseWriter, r *http.Request){
 	c.Infof("cs253: Requested URL: %v", r.URL)
 	c.Infof("cs253: HTTP METHOD: %v",r.Method)
 	if r.Method == "GET" {
-		r13 := Rot13{}
-		writeFormRot13(w, r13)
+		writeFormRot13(w, "")
 	} else if r.Method == "POST"{
-		r13 := Rot13{r.FormValue("text"),}
-		r13.Str = r13.Encode()
-		c.Infof("cs253: Rot13 %v",r13.Str)
-		writeFormRot13(w, r13)
+		var r13 Rot13 = Rot13(r.FormValue("text"))
+		c.Infof("cs253: Rot13 %v",r13.Encode())
+		writeFormRot13(w, r13.Encode())
 	}else{
 		tools.Error404(w)
 		return

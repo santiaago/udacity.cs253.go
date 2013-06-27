@@ -6,33 +6,23 @@ import (
 )
 
 // IsUsernameValid returns true is username is a string between 3 and 20 characters.
+var USERNAME_RE = regexp.MustCompile(`^[a-zA-Z0-9_-]{3,20}$`)
 func IsUsernameValid(username string) bool{
-	r := regexp.MustCompile(`^[a-zA-Z0-9_-]{3,20}$`)
-	
-	if r.MatchString(username) == true{
-		return true
-	}
-	return false
+
+	return USERNAME_RE.MatchString(username) 
 }
 
 // IsPasswordValid returns true for all passwords that are between 3 and 20 characters.
+var PASSWORD_RE = regexp.MustCompile(`^.{3,20}$`)
 func IsPasswordValid(password string) bool{
-	r := regexp.MustCompile(`^.{3,20}$`)
 	
-	if r.MatchString(password) == true{
-		return true
-	}
-	return false
+	return PASSWORD_RE.MatchString(password)
 }
 // IsEmailValid returns true if string email has the form a@b.c
+var EMAIL_RE = regexp.MustCompile(`^[\S]+@[\S]+\.[\S]+$`)
 func IsEmailValid(email string) bool{
 
-	r := regexp.MustCompile(`^[\S]+@[\S]+\.[\S]+$`)
-	
-	if r.MatchString(email) == true{
-		return true
-	}
-	return false
+	return EMAIL_RE.MatchString(email)
 }
 
 // IsStringValid returns true if string is not empty.
