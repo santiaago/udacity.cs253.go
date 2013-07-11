@@ -24,7 +24,7 @@ func BlogFrontHandler(w http.ResponseWriter, r *http.Request){
 		for i, _ := range posts {
 			c.Infof("cs253: Post id: %v", posts[i].Id)
 		}
-		writeBlog(w, posts)
+		writeBlog(c, w, posts)
 	}else{
 		tools.Error404(w)
 		return
@@ -32,9 +32,15 @@ func BlogFrontHandler(w http.ResponseWriter, r *http.Request){
 }
 
 // writeBlog executes the blog template with a slice of Posts.
-func writeBlog(w http.ResponseWriter, posts []*models.Post){
-	tmpl, _ := template.ParseFiles("templates/blog.html","templates/post.html")
-	tmpl.ExecuteTemplate(w,"blog",posts)
+func writeBlog(c appengine.Context, w http.ResponseWriter, posts []*models.Post){
+	tmpl, err := template.ParseFiles("templates/blog.html","templates/post.html")
+	if err != nil{
+		c.Errorf(err.Error())
+	}
+	err = tmpl.ExecuteTemplate(w,"blog",posts)
+	if err != nil{
+		c.Errorf(err.Error())
+	}
 }
 
 // NewPostHandler is the HTTP handler to create a new Post
@@ -44,7 +50,7 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request){
 	c.Infof("cs253: Method: %v", r.Method)
 	
 	if r.Method == "GET" {
-		writeNewPostForm(w, &NewPostForm{})
+		writeNewPostForm(c, w, &NewPostForm{})
 	}else if r.Method == "POST"{
 		postForm := NewPostForm{
 			r.FormValue("subject"),
@@ -55,7 +61,7 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request){
 			tools.IsStringValid(postForm.Content)){
 			
 			postForm.Error = "We need to set both a subject and some content"
-			writeNewPostForm(w, &postForm)
+			writeNewPostForm(c, w, &postForm)
 		}else{
 			c.Infof("cs253: Blog new post:")
 			
@@ -92,9 +98,15 @@ type NewPostForm struct{
 }
 
 // writeNewPostForm executes the newpost.html template with NewPostForm type as param.
-func writeNewPostForm(w http.ResponseWriter, postForm *NewPostForm){
-	tmpl, _ := template.ParseFiles("templates/newpost.html")
-	tmpl.Execute(w,postForm)
+func writeNewPostForm(c appengine.Context, w http.ResponseWriter, postForm *NewPostForm){
+	tmpl, err := template.ParseFiles("templates/newpost.html")
+	if err != nil{
+		c.Errorf(err.Error())
+	}
+	err = tmpl.Execute(w,postForm)
+	if err != nil{
+		c.Errorf(err.Error())
+	}
 }
 
 // PermalinkHandler is the HTTP handler for displaying a single post.
@@ -115,7 +127,7 @@ func PermalinkHandler(w http.ResponseWriter, r *http.Request){
 		c.Infof("cs253: Post id: %v", postAndTime.Post.Id)
 		c.Infof("cs253: Cache hit time: %v", postAndTime.Cache_hit_time)
 		
-		writePermalink(w, postAndTime)
+		writePermalink(c, w, postAndTime)
 	}else{
 		tools.Error404(w)
 		return
@@ -123,7 +135,13 @@ func PermalinkHandler(w http.ResponseWriter, r *http.Request){
 }
 
 // writePermalink executes the permalink.html template with a PostAndTime type as param.
-func writePermalink(w http.ResponseWriter, p models.PostAndTime){
-	tmpl, _ := template.ParseFiles("templates/permalink.html","templates/post.html")
-	tmpl.ExecuteTemplate(w,"permalink",p)
+func writePermalink(c appengine.Context, w http.ResponseWriter, p models.PostAndTime){
+	tmpl, err := template.ParseFiles("templates/permalink.html","templates/post.html")
+	if err != nil{
+		c.Errorf(err.Error())
+	}
+	err = tmpl.ExecuteTemplate(w,"permalink",p)
+	if err !=nil{
+		c.Errorf(err.Error())
+	}
 }
